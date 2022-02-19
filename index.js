@@ -63,10 +63,10 @@ getProxies().then(() => {
             clearInterval(intervalId);
         /* if(arrCtr == payloads.length) 
           clearInterval(intervalId); */
-    }, 10000);
+    }, 2000);
 });
 
-cron.schedule("*/5 * * * *", () => {
+cron.schedule("*/2 * * * *", () => {
     getProxies().then(() => console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies."));
 })
 
@@ -92,7 +92,7 @@ async function httpsRequests() {
     var burp0_options = {
         url: "https://example.com",
         headers: burp0_headers,
-        method: "post",
+        method: "get",
         body: burp0_bodyString,
         agent: proxyAgent
     }
@@ -104,13 +104,21 @@ async function httpsRequests() {
          const body = await response.text();
          console.log(body); */
 
-        let response = await fetch(`https://example.com`, burp0_options).then(res => res.json());
-        if (response.ok) {
-            ctr++;
-            // arrCtr++
-            fs.appendFileSync('./log.txt', JSON.stringify(response) + "\n------------\n\n", err => console.log(err))
+        let response = await fetch(`https://example.com`, burp0_options).then(res => {
+                if (res.ok) {
+                    ctr++;
+                    console.log("Count: " + ctr)
+                    // arrCtr++
+                }
+                return res.json();
+            })
+            .catch(e => console.log(e))
+
+        if (response !== undefined) {
+            console.log(response)
+            fs.appendFileSync('./log.txt', "\n" + JSON.stringify(response) + "\n------------\n");
         }
-        console.log(response)
+
     } catch (e) {
         console.log(e);
     }
