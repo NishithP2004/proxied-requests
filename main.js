@@ -60,14 +60,16 @@ getProxies().then(() => {
     console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies.");
     var intervalId = setInterval(() => {
         httpsRequests();
-        if (ctr == requestCount)
+        if (ctr == requestCount) {
             clearInterval(intervalId);
+            task.stop();
+        }
         /* if(arrCtr == payloads.length) 
           clearInterval(intervalId); */
     }, 500);
 });
 
-cron.schedule("*/2 * * * *", () => {
+var task = cron.schedule("*/2 * * * *", () => {
     getProxies().then(() => console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies."));
 })
 
@@ -96,6 +98,7 @@ async function makeRequests(url, options) {
         .catch(e => console.log(e))
 
     console.log(response)
+    return isValidProxy;
 }
 async function httpsRequests() {
     // Add Request Body, Cookies & Headers
