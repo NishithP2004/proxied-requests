@@ -6,8 +6,12 @@ const fetch = (...args) => import('node-fetch').then(({
     default: fetch
 }) => fetch(...args));
 const HttpsProxyAgent = require('https-proxy-agent');
+const {
+    base64encode,
+    base64decode
+} = require('nodejs-base64');
 
-// Express Initialised
+/* // Express Initialised
 const express = require('express');
 const app = express({
     urlEncoded: true
@@ -20,14 +24,14 @@ app.listen(port, () => {
 
 app.get('/logs', (req, res) => {
     res.status(200).sendFile(__dirname + "/log.txt");
-})
+}) */
 
 var ip = [];
 /* var payloads = fs.readFileSync('./payloads.txt', 'utf8', (err, file) => {
     if (err) console.log(err);
 }).split(/\n/);
 var arrCtr=0; */
-var requestCount = 60000,
+var requestCount = 100000,
     ctr = 0;
 var validProxy = undefined;
 
@@ -63,6 +67,7 @@ getProxies().then(() => {
         if (ctr == requestCount) {
             clearInterval(intervalId);
             task.stop();
+            process.exit(0);
         }
         /* if(arrCtr == payloads.length) 
           clearInterval(intervalId); */
@@ -74,14 +79,14 @@ var task = cron.schedule("*/2 * * * *", () => {
 })
 
 
-function generatePassword(size = 8) {
+/* function generatePassword(size = 8) {
     let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
     let pass = "";
     for (let i = 0; i < size; i++) {
         pass += chars[Math.floor(Math.random() * chars.length)];
     }
     return pass;
-}
+} */
 
 async function makeRequests(url, options) {
     let isValidProxy = false;
@@ -97,18 +102,27 @@ async function makeRequests(url, options) {
         })
         .catch(e => console.log(e.toString()))
 
-    console.log(response)
+    if (response !== undefined) {
+        console.log(response)
+    } else if ((response.status == 403 || response.success == false) && response !== undefined) {
+        isValidProxy = false;
+    }
     return isValidProxy;
 }
+
+
 async function httpsRequests() {
     // Add Request Body, Cookies & Headers
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
+    let base64Text = "";
+    let decodedJson = JSON.parse(base64decode(base64Text));
+    let encodedJson = base64encode(JSON.stringify(decodedJson));
+
     // var burp0_cookie, burp0_bodyString, burp0_headers;
-    var burp0_cookie, burp0_bodyString, burp0_headers;
 
     let proxyAgent;
-
-    if (validProxy) {
+    if (validProxy !== "") {
         proxyAgent = validProxy;
     } else {
         let index = Math.floor(Math.random() * ip.length);
@@ -133,12 +147,12 @@ async function httpsRequests() {
          console.log(body); */
 
         let isValidProxy = makeRequests("https://example.com", burp0_options);
-        if (isValidProxy)
+        if (isValidProxy === true)
             validProxy = proxyAgent
         else
             validProxy = undefined;
 
     } catch (e) {
-        console.log(e);
+        console.log(e.toString());
     }
 }
