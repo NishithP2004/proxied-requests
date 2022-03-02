@@ -115,9 +115,9 @@ async function httpsRequests() {
     // Add Request Body, Cookies & Headers
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
-    let base64Text = "";
+    /* let base64Text = "";
     let decodedJson = JSON.parse(base64decode(base64Text));
-    let encodedJson = base64encode(JSON.stringify(decodedJson));
+    let encodedJson = base64encode(JSON.stringify(decodedJson)); */
 
     // var burp0_cookie, burp0_bodyString, burp0_headers;
 
