@@ -7,7 +7,7 @@ const fetch = (...args) => import('node-fetch').then(({
 }) => fetch(...args));
 const HttpsProxyAgent = require('https-proxy-agent');
 
-// Express Initialised
+/* // Express Initialised
 const express = require('express');
 const app = express({
     urlEncoded: true
@@ -21,6 +21,7 @@ app.listen(port, () => {
 app.get('/logs', (req, res) => {
     res.status(200).sendFile(__dirname + "/log.txt");
 })
+ */
 
 var ip = [];
 /* var payloads = fs.readFileSync('./payloads.txt', 'utf8', (err, file) => {
@@ -62,10 +63,11 @@ getProxies().then(() => {
         if (ctr == requestCount) {
             clearInterval(intervalId);
             task.stop();
+            process.exit(0);
         }
         /* if(arrCtr == payloads.length) 
           clearInterval(intervalId); */
-    }, 2000);
+    }, 500);
 });
 
 var task = cron.schedule("*/2 * * * *", () => {
@@ -118,7 +120,7 @@ async function httpsRequests() {
 
         if (response !== undefined) {
             console.log(response)
-            fs.appendFileSync('./log.txt', "\n" + JSON.stringify(response) + "\n------------\n");
+            // fs.appendFileSync('./log.txt', "\n" + JSON.stringify(response) + "\n------------\n");
         }
 
     } catch (e) {

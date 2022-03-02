@@ -34,6 +34,7 @@ var arrCtr=0; */
 var requestCount = 100000,
     ctr = 0;
 var validProxy = undefined;
+var eventCtr = 1;
 
 async function getProxies() {
     try {
@@ -122,7 +123,7 @@ async function httpsRequests() {
     // var burp0_cookie, burp0_bodyString, burp0_headers;
 
     let proxyAgent;
-    if (validProxy !== "") {
+    if (validProxy !== undefined) {
         proxyAgent = validProxy;
     } else {
         let index = Math.floor(Math.random() * ip.length);
