@@ -1,0 +1,9 @@
+{
+    "burp0_cookie": "",
+    "burp0_bodyString": "",
+    "burp0_headers": {
+        "Cookie": ""
+    },
+    "requestUrl": "https://example.com",
+    "requestType": "GET"
+}

@@ -6,6 +6,9 @@ const fetch = (...args) => import('node-fetch').then(({
     default: fetch
 }) => fetch(...args));
 const HttpsProxyAgent = require('https-proxy-agent');
+const prompt = require('prompt');
+
+const data = require('./request.json')
 
 // Express Initialised
 const express = require('express');
@@ -14,10 +17,87 @@ const app = express({
 });
 
 
-var port = process.env.PORT || 3001 || 3002 || 3003;
-app.listen(port, () => {
-    console.log(`Listening on Port: ${port}`)
+// Configuration - Change Me
+var port = process.env.PORT || 3000;
+
+var requestCount = 100000,
+    ctr = 0;
+var requestInterval = 1000; // in ms
+var validIP = undefined,
+    currentIP = undefined;
+
+// From request.json
+var {
+    burp0_cookie,
+    burp0_bodyString,
+    burp0_headers,
+    requestType,
+    requestUrl
+} = data;
+burp0_headers["Cookie"] = burp0_cookie;
+
+const input = [{
+        name: "port",
+        pattern: /\d/,
+        required: false
+    },
+    {
+        name: "requestCount",
+        pattern: /\d/,
+        required: false
+    },
+    {
+        name: "requestInterval",
+        pattern: /\d/,
+        required: false
+    }
+]
+
+prompt.get(input, (err, result) => {
+    if (err) {
+        console.log(err);
+        process.exit(1);
+    } else {
+
+        if (result.requestCount)
+            ({
+                requestCount
+            } = result);
+        if (result.requestInterval)
+            ({
+                requestInterval
+            } = result);
+        if (result.port)
+            ({
+                port
+            } = result);
+
+        app.listen(port, () => {
+            console.log(`Listening on Port: ${port}`)
+        })
+
+        getProxies().then(() => {
+            console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies.");
+            var intervalId = setInterval(() => {
+                httpsRequests();
+                if (ctr == requestCount) {
+                    clearInterval(intervalId);
+                    task.stop();
+                    process.exit(0);
+                }
+                /* if(arrCtr == payloads.length) 
+                  clearInterval(intervalId); */
+            }, requestInterval);
+        });
+
+        var task = cron.schedule("*/2 * * * *", () => {
+            getProxies().then(() => console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies."));
+        })
+
+
+    }
 })
+
 
 app.get("/kill", (req, res) => {
     res.status(200).send("Killing Automation...");
@@ -33,13 +113,6 @@ var ip = [];
     if (err) console.log(err);
 }).split(/\n/);
 var arrCtr=0; */
-
-// Configuration - Change Me
-var requestCount = 100000,
-    ctr = 0;
-var requestInterval = 500; // in ms
-var validIP = undefined,
-    currentIP = undefined;
 
 
 async function getProxies() {
@@ -67,34 +140,6 @@ async function getProxies() {
     }).split(/\n/);
 }
 
-getProxies().then(() => {
-    console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies.");
-    var intervalId = setInterval(() => {
-        httpsRequests();
-        if (ctr == requestCount) {
-            clearInterval(intervalId);
-            task.stop();
-            process.exit(0);
-        }
-        /* if(arrCtr == payloads.length) 
-          clearInterval(intervalId); */
-    }, requestInterval);
-});
-
-var task = cron.schedule("*/2 * * * *", () => {
-    getProxies().then(() => console.log("Successfuly Extracted IP Address's - Proxies from SSLProxies."));
-})
-
-
-/* function generatePassword(size = 8) {
-    let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
-    let pass = "";
-    for (let i = 0; i < size; i++) {
-        pass += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return pass;
-} */
-
 async function makeRequests(url, options) {
     try {
         let isValidProxy = false;
@@ -113,10 +158,12 @@ async function makeRequests(url, options) {
 
         if (response !== undefined) {
             console.log(response);
-        } else if (response !== undefined && (response.status === 429 || response.success === false)) {
-            console.log(response);
-            isValidProxy = false
-        } 
+        } else if (response !== undefined && (response.hasOwnProperty("status") == true && response.hasOwnProperty("success") == true)) {
+            if (response.status === 429 || response.success === false) {
+                console.log(response);
+                isValidProxy = false
+            }
+        }
 
         if (isValidProxy == true)
             validIP = currentIP;
@@ -130,7 +177,6 @@ async function makeRequests(url, options) {
 async function httpsRequests() {
     // Add Request Body, Cookies & Headers
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
-    var burp0_cookie, burp0_bodyString, burp0_headers;
 
     let proxyAgent;
     if (validIP !== undefined) {
@@ -145,9 +191,9 @@ async function httpsRequests() {
 
     // Add Request Options
     var burp0_options = {
-        url: "https://example.com",
+        url: requestUrl,
         headers: burp0_headers,
-        method: "GET",
+        method: requestType,
         body: burp0_bodyString,
         agent: proxyAgent
     }
@@ -159,7 +205,7 @@ async function httpsRequests() {
          const body = await response.text();
          console.log(body); */
 
-        makeRequests("https://example.com", burp0_options);
+        makeRequests(requestUrl, burp0_options);
 
     } catch (e) {
         console.log(e.toString());
