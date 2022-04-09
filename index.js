@@ -99,7 +99,7 @@ prompt.get(input, (err, result) => {
             enableLogs
         } = result);
 
-        if (/yes|no|y|n/i.test(result["parse"]) == true) parseTxtReqToJson();
+        if (/yes|y/i.test(result["parse"]) == true) parseTxtReqToJson();
 
         app.listen(port, () => {
             console.log(colors.yellow(`Listening on Port: ${port}`))
