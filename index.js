@@ -157,14 +157,14 @@ const parseTxtReqToJson = () => {
             } else if (requestArr[i].startsWith("var burp0_headers = ")) {
                 i++;
                 while (requestArr[i][0] != "}") {
-                    temp[requestArr[i].trim().substring(1, requestArr[i].trim().indexOf(":") - 1)] = requestArr[i].trim().substring(requestArr[i].trim().indexOf(":") + 3, requestArr[i].trim().indexOf(",") - 1)
+                    temp[requestArr[i].trim().substring(1, requestArr[i].trim().indexOf(":") - 1)] = requestArr[i].trim().substring(requestArr[i].trim().indexOf(":") + 3, requestArr[i].trim().lastIndexOf(",") - 1)
                     i++;
                 }
                 i--;
             } else if (requestArr[i].startsWith("var burp0_options = ")) {
                 i++;
                 while (requestArr[i][0] != "}") {
-                    temp2[requestArr[i].trim().substring(0, requestArr[i].trim().indexOf(":"))] = requestArr[i].trim().substring(requestArr[i].trim().indexOf(":") + 2, requestArr[i].trim().indexOf(",") - 1)
+                    temp2[requestArr[i].trim().substring(0, requestArr[i].trim().indexOf(":"))] = requestArr[i].trim().substring(requestArr[i].trim().indexOf(":") + 2, requestArr[i].trim().lastIndexOf(",") - 1)
                     i++;
                 }
                 i--;
