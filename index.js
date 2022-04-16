@@ -154,6 +154,7 @@ const parseTxtReqToJson = () => {
                 burp0_cookie = requestArr[i].trim().slice(requestArr.indexOf("var burp0_cookie = \"") + "var burp0_cookie = \"".length + 1, requestArr[i].trim().length - 1);
             } else if (requestArr[i].startsWith("var burp0_bodyString = ")) {
                 burp0_bodyString = requestArr[i].trim().slice(requestArr.indexOf("var burp0_bodyString = \"") + "var burp0_bodyString = \"".length + 1, requestArr[i].trim().length - 1);
+                if (burp0_bodyString.startsWith("{") == true) burp0_bodyString = JSON.stringify(JSON.parse(JSON.parse("\"" + burp0_bodyString + "\"")));
             } else if (requestArr[i].startsWith("var burp0_headers = ")) {
                 i++;
                 while (requestArr[i][0] != "}") {
